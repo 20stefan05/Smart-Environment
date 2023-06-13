@@ -1,34 +1,56 @@
-#include "RTOS.h"
-#define TEMPERATURE 0
-#define HUMIDITY 1
-uint8_t last = TEMPERATURE;
+#include "LoRaCommunication.h"
+#include "SoilMoistureMonitor.h"
+#include "SoilTempMonitor.h"
+#include "AirTempHumidity_Monitor.h"
+
+int moduleType = soilModule;
+
+extern bool lora_tx;
+float airTemperature, airHumidity, soilTemperature, soilMoisture;
+void updateSoilSensors(float *soilTemperature, float *soilMoisture);
+void updateAirSensors(float *airTemperature, float *airHumidity);
+
 void setup()
 {
   // put your setup code here, to run once:
   Serial.begin(9600);
   LoRa_Init();
-#ifdef SOIL_MODULE
-  //PumpInit();
-  //Dallas_Init();
-#endif
-#ifdef AIR_MODULE
-      //DHT_Init();
-#endif
+  if (moduleType == soilModule)
+  {
+    PumpInit();
+    Dallas_Init();
+  }
+  else if (moduleType == airModule)
+  {
+    DHT_Init();
+  }
 }
-int currentTime = millis();
 void loop()
 {
-  // put your main code here, to run repeatedly:
-  if (millis() - currentTime >= SAMPLE_RATE)
+  if (!lora_tx)
   {
-    currentTime = millis();
-#ifdef SOIL_MODULE
-    TaskSoilModule(last);
-    last^=0x01;
-#endif
-#ifdef AIR_MODULE
-    TaskAirModule(last);
-    last^=0x01;
-#endif
+    LoRa_Receive();
   }
+  else if (lora_tx)
+  {
+    LoRa_Send();
+  }
+  if (moduleType == soilModule)
+  {
+    updateSoilSensors(&soilTemperature, &soilMoisture);
+  }
+  else if (moduleType == airModule)
+  {
+    updateAirSensors(&airTemperature, &airHumidity);
+  }
+}
+void updateSoilSensors(float *soilTemperature, float *soilMoisture)
+{
+  *soilTemperature = Dallas_GetTemp();
+  *soilMoisture = GetSoilMoist();
+}
+void updateAirSensors(float *airTemperature, float *airHumidity)
+{
+  *airTemperature = DHT_GetTemp();
+  *airHumidity = DHT_GetHum();
 }

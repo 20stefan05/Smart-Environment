@@ -4,6 +4,7 @@
 #include "LoRaWan_APP.h"
 #include "ArduinoJson.h"
 #include "config.h"
+#include "PumpControl.h"
 #define RF_FREQUENCY                                915000000 // Hz
 
 #define TX_OUTPUT_POWER                             14        // dBm
@@ -24,8 +25,9 @@
 
 
 #define RX_TIMEOUT_VALUE                            1000
-#define BUFFER_SIZE                                 8 // Define the payload size here
+#define BUFFER_SIZE                                 512 // Define the payload size here
 
 void LoRa_Init();
-void LoRa_Send(uint8_t Place, uint8_t DataType,float value);
+void LoRa_Send();
+void LoRa_Receive();
 #endif

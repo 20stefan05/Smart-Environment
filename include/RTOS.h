@@ -4,6 +4,7 @@
 #include "SoilTempMonitor.h"
 #include "SoilMoistureMonitor.h"
 #include "LoRaCommunication.h"
+#include "PumpControl.h"
 void TaskAirModule(uint8_t);
 void TaskSoilModule(uint8_t);
 #endif
